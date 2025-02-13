@@ -30,11 +30,36 @@ const initialBoard = [
   ],
 ];
 
+const promotionOptions = ["queen", "rook", "bishop", "knight"];
+
+const PromotionModal = ({ onSelect, color }) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+      <div className="bg-white p-4 rounded shadow-lg">
+        <h2 className="text-lg font-bold mb-2">Select Promotion</h2>
+        <div className="flex gap-2">
+          {promotionOptions.map((option) => (
+            <button
+              key={option}
+              className="p-2 border rounded bg-gray-200 hover:bg-gray-400"
+              onClick={() => onSelect(`${color}${option}`)}
+            >
+              <ChessPiece piece={`${color}${option}`} />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ChessBoard = () => {
   const [board, setBoard] = useState(initialBoard);
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [turn, setTurn] = useState("W");
   const [gameStatus, setGameStatus] = useState("ongoing");
+  const [promotionSquare, setPromotionSquare] = useState(null);
+
   const [castlingRights, setCastlingRights] = useState({
     W: { kingSide: true, queenSide: true },
     B: { kingSide: true, queenSide: true },
@@ -47,6 +72,8 @@ const ChessBoard = () => {
   }, [turn]);
 
   const handleClick = (row, col) => {
+    if (promotionSquare) return;
+
     if (gameStatus === "ongoing" || gameStatus === "check") {
       if (selectedPiece) {
         if (isLegalMove(selectedPiece.row, selectedPiece.col, row, col)) {
@@ -63,6 +90,15 @@ const ChessBoard = () => {
     } else {
       return;
     }
+  };
+
+  const handlePromotion = (newPiece) => {
+    if (!promotionSquare) return;
+    const newBoard = board.map((row) => [...row]);
+    newBoard[promotionSquare.row][promotionSquare.col] = newPiece;
+    setBoard(newBoard);
+    setPromotionSquare(null);
+    setTurn(turn === "W" ? "B" : "W");
   };
 
   const movePiece = (toRow, toCol) => {
@@ -111,7 +147,17 @@ const ChessBoard = () => {
 
     // Pawn promotion
     if (pieceType === "pawn" && (toRow === 0 || toRow === 7)) {
-      newBoard[toRow][toCol] = movingPiece[0] + "queen";
+      newBoard[toRow][toCol] = "";
+      setPromotionSquare({
+        row: toRow,
+        col: toCol,
+        color: movingPiece[0],
+      });
+
+      setBoard(newBoard);
+      setSelectedPiece(null);
+
+      return;
     }
 
     // Update castling rights
@@ -399,6 +445,12 @@ const ChessBoard = () => {
 
   return (
     <div className="flex flex-col items-center">
+      {promotionSquare && (
+        <PromotionModal
+          onSelect={handlePromotion}
+          color={promotionSquare.color}
+        />
+      )}
       <h2 className="text-lg sm:text-xl lg:text-2xl mb-4 font-bold text-red-500">
         {gameStatus === "ongoing"
           ? `${turn === "W" ? "White" : "Black"}'s Turn`
