@@ -47,21 +47,19 @@ const ChessBoard = () => {
   }, [turn]);
 
   const handleClick = (row, col) => {
-    if (gameStatus === "ongoing" || gameStatus === "check") {
-      if (selectedPiece) {
-        if (isLegalMove(selectedPiece.row, selectedPiece.col, row, col)) {
-          movePiece(row, col);
-        } else {
-          setSelectedPiece(null);
-        }
+    if (gameStatus !== "ongoing") return;
+
+    if (selectedPiece) {
+      if (isLegalMove(selectedPiece.row, selectedPiece.col, row, col)) {
+        movePiece(row, col);
       } else {
-        const piece = board[row][col];
-        if (piece && piece[0] === turn) {
-          setSelectedPiece({ row, col, piece });
-        }
+        setSelectedPiece(null);
       }
     } else {
-      return;
+      const piece = board[row][col];
+      if (piece && piece[0] === turn) {
+        setSelectedPiece({ row, col, piece });
+      }
     }
   };
 
@@ -325,10 +323,7 @@ const ChessBoard = () => {
   const hasLegalMoves = (color, boardState = board) => {
     for (let startRow = 0; startRow < 8; startRow++) {
       for (let startCol = 0; startCol < 8; startCol++) {
-        if (
-          boardState[startRow][startCol] &&
-          boardState[startRow][startCol][0] === color
-        ) {
+        if (boardState[startRow][startCol][0] === color) {
           for (let endRow = 0; endRow < 8; endRow++) {
             for (let endCol = 0; endCol < 8; endCol++) {
               if (isLegalMove(startRow, startCol, endRow, endCol)) {
@@ -364,18 +359,14 @@ const ChessBoard = () => {
   };
 
   const checkGameStatus = () => {
-    const isCheck = isKingInCheck(turn);
-    const hasMoves = hasLegalMoves(turn);
-
-    if (isCheck && !hasMoves) {
-      setGameStatus("checkmate");
-      console.log("Checkmate! Fim do jogo.");
-    } else if (isCheck && hasMoves) {
-      setGameStatus("check");
-      console.log("Check!");
-    } else if (!isCheck && !hasMoves) {
+    if (isKingInCheck(turn)) {
+      if (!hasLegalMoves(turn)) {
+        setGameStatus("checkmate");
+      } else {
+        setGameStatus("check");
+      }
+    } else if (!hasLegalMoves(turn)) {
       setGameStatus("stalemate");
-      console.log("Empate por afogamento!");
     } else {
       setGameStatus("ongoing");
     }
@@ -395,45 +386,26 @@ const ChessBoard = () => {
     </div>
   );
 
-  const columnLabels = ["A", "B", "C", "D", "E", "F", "G", "H"];
-  const rowLabels = ["8", "7", "6", "5", "4", "3", "2", "1"];
-
   return (
     <div className="flex flex-col items-center">
       <h2 className="text-lg sm:text-xl lg:text-2xl mb-4 font-bold text-red-500">
         {gameStatus === "ongoing"
           ? `${turn === "W" ? "White" : "Black"}'s Turn`
-          : gameStatus === "check"
-          ? `${turn === "W" ? "White" : "Black"} is in check!`
           : gameStatus === "checkmate"
           ? `Checkmate! ${turn === "W" ? "Black" : "White"} wins!`
           : gameStatus === "stalemate"
           ? "Stalemate! The game is a draw."
           : `${turn === "W" ? "White" : "Black"} is in check!`}
       </h2>
-
       <div className="w-full max-w-[80vw] mb-4">
         <CapturedPieces pieces={capturedPieces.W} color="W" />
       </div>
-
-      <div className="flex">
-        <div className="grid grid-rows-8 gap-0.5">
-          {rowLabels.map((label, index) => (
+      <div className="grid grid-cols-8 gap-0.5">
+        {board.map((row, rowIndex) =>
+          row.map((piece, colIndex) => (
             <div
-              key={index}
-              className="flex items-center justify-center font-bold text-lg sm:text-xl mr-7"
-            >
-              {label}
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-8 gap-0.5">
-          {board.map((row, rowIndex) =>
-            row.map((piece, colIndex) => (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                className={`w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 flex items-center justify-center text-lg sm:text-2xl lg:text-3xl cursor-pointer
+              key={`${rowIndex}-${colIndex}`}
+              className={`w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 flex items-center justify-center text-lg sm:text-2xl lg:text-3xl cursor-pointer
                 ${
                   (rowIndex + colIndex) % 2 === 0
                     ? "bg-amber-200"
@@ -457,27 +429,14 @@ const ChessBoard = () => {
                     ? "bg-green-400"
                     : ""
                 }`}
-                onClick={() => handleClick(rowIndex, colIndex)}
-              >
-                <ChessPiece piece={piece} />
-              </div>
-            ))
-          )}
-        </div>
+              onClick={() => handleClick(rowIndex, colIndex)}
+            >
+              <ChessPiece piece={piece} />
+            </div>
+          ))
+        )}
       </div>
-
-      <div className="grid grid-cols-8 gap-0.5 w-full pl-10 mt-6">
-        {columnLabels.map((label, index) => (
-          <div
-            key={index}
-            className="w-full text-center font-bold text-lg sm:text-xl"
-          >
-            {label}
-          </div>
-        ))}
-      </div>
-
-      <div className="w-full max-w-[80vw]">
+      <div className="w-full max-w-[80vw] mt-4">
         <CapturedPieces pieces={capturedPieces.B} color="B" />
       </div>
     </div>
