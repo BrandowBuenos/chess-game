@@ -306,19 +306,22 @@ const ChessBoard = () => {
     // Castling
     if (startRow === endRow && Math.abs(startCol - endCol) === 2) {
       const isKingSide = endCol > startCol;
+      const rookCol = isKingSide ? 7 : 0;
+
+      // The king and rook must not have moved
       if (!castlingRights[color][isKingSide ? "kingSide" : "queenSide"])
         return false;
 
-      const rookCol = isKingSide ? 7 : 0;
-      if (board[startRow][rookCol][1] !== "rook") return false;
+      if (board[startRow][rookCol] !== `${color}rook`) return false;
 
+      // The squares between the king and rook must be empty
       const direction = isKingSide ? 1 : -1;
       for (let i = startCol + direction; i !== rookCol; i += direction) {
         if (board[startRow][i] !== "") return false;
       }
 
-      // Check if the king passes through check
-      for (let i = startCol; i !== endCol; i += direction) {
+      // The squares that the king moves through must not be under attack
+      for (let i = startCol; i !== endCol + direction; i += direction) {
         if (isSquareUnderAttack(startRow, i, color)) return false;
       }
 
