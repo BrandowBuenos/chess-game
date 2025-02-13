@@ -1,5 +1,5 @@
-import React from 'react';
-import ChessBoard from './components/ChessBoard';
+import React from "react";
+import ChessBoard from "./components/ChessBoard";
 
 function App() {
   return (
@@ -7,7 +7,9 @@ function App() {
       <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-lg">
         <ChessBoard />
       </div>
-        <p className='font-bold text-center text-green-900 mt-3 lg:text-2xl'>Khaireddine Weld Biohazard</p>
+      <p className="font-bold text-center text-green-900 mt-3 lg:text-2xl">
+        Khaireddine Weld Biohazard
+      </p>
     </div>
   );
 }

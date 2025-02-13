@@ -471,11 +471,11 @@ const ChessBoard = () => {
       </div>
 
       <div className="flex">
-        <div className="grid grid-rows-8 gap-0.5">
+        <div className="grid grid-rows-8 gap-0.5 mr-3 lg:mr-7">
           {rowLabels.map((label, index) => (
             <div
               key={index}
-              className="flex items-center justify-center font-bold text-lg sm:text-xl mr-7"
+              className="flex items-center justify-center font-bold text-md sm:text-xl"
             >
               {label}
             </div>
@@ -524,7 +524,7 @@ const ChessBoard = () => {
         {columnLabels.map((label, index) => (
           <div
             key={index}
-            className="w-full text-center font-bold text-lg sm:text-xl"
+            className="w-full text-center font-bold text-md sm:text-xl"
           >
             {label}
           </div>
