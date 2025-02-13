@@ -69,6 +69,7 @@ const ChessBoard = () => {
     const newBoard = board.map((row) => [...row]);
     const [fromRow, fromCol] = [selectedPiece.row, selectedPiece.col];
     const movingPiece = selectedPiece.piece;
+    const pieceType = movingPiece.slice(1).toLowerCase();
 
     // Handle capture
     const capturedPiece = newBoard[toRow][toCol];
@@ -81,7 +82,7 @@ const ChessBoard = () => {
     }
 
     // Handle castling
-    if (movingPiece[1] === "king" && Math.abs(fromCol - toCol) === 2) {
+    if (pieceType === "king" && Math.abs(fromCol - toCol) === 2) {
       const isKingSide = toCol > fromCol;
       const rookCol = isKingSide ? 7 : 0;
       const newRookCol = isKingSide ? 5 : 3;
@@ -91,7 +92,7 @@ const ChessBoard = () => {
 
     // Handle en passant
     if (
-      movingPiece[1] === "pawn" &&
+      pieceType === "pawn" &&
       Math.abs(fromCol - toCol) === 1 &&
       newBoard[toRow][toCol] === ""
     ) {
@@ -109,7 +110,7 @@ const ChessBoard = () => {
     newBoard[fromRow][fromCol] = "";
 
     // Pawn promotion
-    if (movingPiece[1] === "pawn" && (toRow === 0 || toRow === 7)) {
+    if (pieceType === "pawn" && (toRow === 0 || toRow === 7)) {
       newBoard[toRow][toCol] = movingPiece[0] + "queen";
     }
 
@@ -118,7 +119,7 @@ const ChessBoard = () => {
 
     // Set en passant target
     setEnPassantTarget(
-      movingPiece[1] === "pawn" && Math.abs(fromRow - toRow) === 2
+      pieceType === "pawn" && Math.abs(fromRow - toRow) === 2
         ? { row: (fromRow + toRow) / 2, col: toCol }
         : null
     );
@@ -351,11 +352,12 @@ const ChessBoard = () => {
   const updateCastlingRights = (piece, fromRow, fromCol) => {
     const newCastlingRights = { ...castlingRights };
     const color = piece[0];
+    const pieceType = piece.slice(1).toLowerCase();
 
-    if (piece[1] === "king") {
+    if (pieceType === "king") {
       newCastlingRights[color].kingSide = false;
       newCastlingRights[color].queenSide = false;
-    } else if (piece[1] === "rook") {
+    } else if (pieceType === "rook") {
       if (fromCol === 0) newCastlingRights[color].queenSide = false;
       if (fromCol === 7) newCastlingRights[color].kingSide = false;
     }
@@ -474,7 +476,7 @@ const ChessBoard = () => {
         ))}
       </div>
 
-      <div className="w-full max-w-[80vw]">
+      <div className="w-full max-w-[80vw] mt-4">
         <CapturedPieces pieces={capturedPieces.B} color="B" />
       </div>
     </div>
